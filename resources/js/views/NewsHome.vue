@@ -67,6 +67,7 @@
                                     vm.news.news_list.push(article);
                                 });
                             }
+                            // this.$store.commit('SET_NEWS_DETAILS', vm.news)
                             this.news.busy = false;                            
                             this.news.url_index ++;
                         }       
