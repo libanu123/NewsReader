@@ -28,6 +28,8 @@ Vue.filter('truncate', function (value, limit) {
 
 import App from './views/App'
 import NewsHome from './views/NewsHome'
+import NewDetails from './views/NewDetails'
+import CategoryNews from './views/CategoryNews'
 
 const router = new VueRouter({
     mode: 'history',
@@ -36,8 +38,21 @@ const router = new VueRouter({
             path: '/',
             name: 'home',
             component: NewsHome,
-            children: [
-            ]
+        },
+        {
+            path: '/news-details/:new_details',
+            name: 'new-details',
+            component: NewDetails,
+            props: true,
+            // props(route) {
+            //     return {  new_details: route.query.new_details }
+            // }
+        },
+        {
+            path: '/category/:cat',
+            name: 'category',
+            component: CategoryNews,
+            // props: true,
         },
     ],
 });

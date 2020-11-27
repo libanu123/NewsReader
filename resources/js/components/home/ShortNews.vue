@@ -21,13 +21,15 @@
                             <p class="card-text mb-auto pl-1">{{ columns['description'] | truncate(120) }}</p>
                         </div>
                         <div class="col-md-12 ">
-                            <a  href="#" class="stretched-link pl-1">Continue reading</a>
+                            <router-link :to="{ name: 'new-details', params: { 'new_details': columns } }">Continue reading</router-link>
+                            <!-- <a href="#" class="stretched-link pl-1">Continue reading</a> -->
                         </div>
                     </div>
                 </div>
             </div>  
         </template>          
     </div>
+
 </template>
 <script>
     export default {
