@@ -14,7 +14,7 @@
         <!-- Scripts -->
         <script src="{{ asset('js/app.js') }}" defer></script>
         <!-- Styles -->
-        <link href="{{ asset('css/app.css') }}" rel="stylesheet">
-        <link rel="stylesheet" href="css/custom-styles.css">
+        <link href="{{ asset('css/app.css') }}" type="text/css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="{{ asset('css/custom-styles.css') }}">
     </body>
 </html>

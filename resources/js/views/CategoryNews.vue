@@ -2,45 +2,47 @@
     <div class="container">
         <Header/>
         <Menu/>
-        <ShortNews :news="news" @update-news="getNews"/> 
+        <CategoryShortNews :news="news" @update-news="getNews"/> 
         <div v-if="news.busy" class="row" style="margin-top:100px; margin-bottom:100px;">
             <div class="col-lg-12 text-center">
                 <img :src="image_src">
             </div>        
         </div>
-        <router-view/>  
-        
+        <router-view/>          
     </div>
-
 </template>
 <script>
     import apiCall from "../utils/api";
     import Header from '../components/home/Header'
     import Menu from '../components/home/Menu'
-    import ShortNews from '../components/home/ShortNews'
+    import CategoryShortNews from '../components/home/CategoryShortNews'
     
     export default {
         components: {
             Header,
             Menu,
-            ShortNews,         
+            CategoryShortNews,         
+        },
+        watch: { 
+            $route() {
+                this.news.url_index = 0;
+                this.news.news_list = [];
+                this.getNews()
+            }
         },
         data () {
             return {
-                image_src: 'image/loader.gif',
+                category_url: '',
+                image_src: '../image/loader.gif',
                 news : {
                     news_list : [],
                     busy: false,
                     url_index : 0,                    
                 },
                 url  : [
-                    'http://newsapi.org/v2/top-headlines?country=us&apiKey=346bfbf84b504d14a0e3dff507aed1e4',
-                    // 'https://newsapi.org/v2/top-headlines?sources=bbc-news&apiKey=eb1eff194ae343ea9a0d78c10df051dc',
-                    // 'https://newsapi.org/v2/top-headlines?country=de&category=business&apiKey=eb1eff194ae343ea9a0d78c10df051dc',
-                    // 'https://newsapi.org/v2/top-headlines?q=trump&apiKey=eb1eff194ae343ea9a0d78c10df051dc',
-                    // 'https://newsapi.org/v2/everything?q=bitcoin&apiKey=eb1eff194ae343ea9a0d78c10df051dc',
-                    // 'https://newsapi.org/v2/everything?q=apple&from=2020-11-26&to=2020-11-26&sortBy=popularity&apiKey=eb1eff194ae343ea9a0d78c10df051dc',
-                    // 'https://newsapi.org/v2/everything?domains=techcrunch.com,thenextweb.com&apiKey=eb1eff194ae343ea9a0d78c10df051dc'
+                    'https://newsapi.org/v2/sources?apiKey=346bfbf84b504d14a0e3dff507aed1e4',
+                    // 'https://newsapi.org/v2/sources?language=en&apiKey=346bfbf84b504d14a0e3dff507aed1e4',
+                    // 'https://newsapi.org/v2/sources?language=en&country=us&apiKey=346bfbf84b504d14a0e3dff507aed1e4'
                 ]
             }
         },
@@ -48,23 +50,28 @@
             
         },
         methods: {
-            getNews() {
+            getNews() {                
                 if(this.url[this.news.url_index] != undefined)
                 {
+                    this.category_url = this.url[this.news.url_index];
+                    if(this.$route.params.cat != undefined)
+                    {
+                        this.category_url += '&category='+this.$route.params.cat+''
+                    }                    
                     const params = {
                     }         
                     apiCall({
-                        url     : this.url[this.news.url_index],
+                        url     : this.category_url,
                         data    : params,
                         method  : "GET"
                     })
                     .then(response => {
                         if(response.data.status == "ok"){
                             var vm = this;
-                            if( response.data.articles.length > 0 )
+                            if( response.data.sources.length > 0 )
                             {
-                                response.data.articles.forEach(function(article){
-                                    vm.news.news_list.push(article);
+                                response.data.sources.forEach(function(source){
+                                    vm.news.news_list.push(source);
                                 });
                             }
                             this.news.busy = false;                            
@@ -73,7 +80,7 @@
                     })
                     .catch(error => {
                         console.log(error);
-                    });
+                    });                    
                 }
                 else{
                    this.news.busy = false; 
