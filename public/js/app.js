@@ -1942,17 +1942,17 @@ __webpack_require__.r(__webpack_exports__);
 //
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: {
-    news: {
-      news_list: [],
-      busy: false,
-      url_index: 0
-    }
+    news: {}
   },
   methods: {
-    /** pagination functions*/
     loadMore: function loadMore() {
       this.news.busy = true;
-      this.$emit('update-news', this.news);
+
+      if (this.news.news_list.length > 0) {
+        this.news.busy = false;
+      } else {
+        this.$emit('update-news', this.news);
+      }
     }
   }
 });
@@ -2053,19 +2053,14 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: {
-    news: {
-      news_list: [],
-      busy: false,
-      url_index: 0
-    }
+    news: {}
   },
   methods: {
-    /** pagination functions*/
     loadMore: function loadMore() {
       this.news.busy = true;
+      this.news.page++;
       this.$emit('update-news', this.news);
     },
     goToNewsDetails: function goToNewsDetails(news) {
@@ -2135,7 +2130,7 @@ __webpack_require__.r(__webpack_exports__);
   },
   watch: {
     $route: function $route() {
-      this.news.url_index = 0;
+      this.news.busy = true;
       this.news.news_list = [];
       this.getNews();
     }
@@ -2146,12 +2141,8 @@ __webpack_require__.r(__webpack_exports__);
       image_src: '../image/loader.gif',
       news: {
         news_list: [],
-        busy: false,
-        url_index: 0
-      },
-      url: ['https://newsapi.org/v2/sources?apiKey=346bfbf84b504d14a0e3dff507aed1e4' // 'https://newsapi.org/v2/sources?language=en&apiKey=346bfbf84b504d14a0e3dff507aed1e4',
-      // 'https://newsapi.org/v2/sources?language=en&country=us&apiKey=346bfbf84b504d14a0e3dff507aed1e4'
-      ]
+        busy: false
+      }
     };
   },
   created: function created() {},
@@ -2159,37 +2150,35 @@ __webpack_require__.r(__webpack_exports__);
     getNews: function getNews() {
       var _this = this;
 
-      if (this.url[this.news.url_index] != undefined) {
-        this.category_url = this.url[this.news.url_index];
+      var params = {
+        country: 'us',
+        apiKey: '346bfbf84b504d14a0e3dff507aed1e4'
+      };
 
-        if (this.$route.params.cat != undefined) {
-          this.category_url += '&category=' + this.$route.params.cat + '';
-        }
-
-        var params = {};
-        Object(_utils_api__WEBPACK_IMPORTED_MODULE_0__["default"])({
-          url: this.category_url,
-          data: params,
-          method: "GET"
-        }).then(function (response) {
-          if (response.data.status == "ok") {
-            var vm = _this;
-
-            if (response.data.sources.length > 0) {
-              response.data.sources.forEach(function (source) {
-                vm.news.news_list.push(source);
-              });
-            }
-
-            _this.news.busy = false;
-            _this.news.url_index++;
-          }
-        })["catch"](function (error) {
-          console.log(error);
-        });
-      } else {
-        this.news.busy = false;
+      if (this.$route.params.cat != undefined) {
+        params.category = this.$route.params.cat;
       }
+
+      var qs = new URLSearchParams(params);
+      Object(_utils_api__WEBPACK_IMPORTED_MODULE_0__["default"])({
+        url: "https://newsapi.org/v2/sources?".concat(qs),
+        data: {},
+        method: "GET"
+      }).then(function (response) {
+        if (response.data.status == "ok") {
+          var vm = _this;
+
+          if (response.data.sources.length > 0) {
+            response.data.sources.forEach(function (source) {
+              vm.news.news_list.push(source);
+            });
+          }
+
+          _this.news.busy = false;
+        }
+      })["catch"](function (error) {
+        console.log(error);
+      });
     }
   },
   mounted: function mounted() {}
@@ -2313,15 +2302,11 @@ __webpack_require__.r(__webpack_exports__);
       news: {
         news_list: [],
         busy: false,
-        url_index: 0
-      },
-      url: ['http://newsapi.org/v2/top-headlines?country=us&apiKey=346bfbf84b504d14a0e3dff507aed1e4' // 'https://newsapi.org/v2/top-headlines?sources=bbc-news&apiKey=eb1eff194ae343ea9a0d78c10df051dc',
-      // 'https://newsapi.org/v2/top-headlines?country=de&category=business&apiKey=eb1eff194ae343ea9a0d78c10df051dc',
-      // 'https://newsapi.org/v2/top-headlines?q=trump&apiKey=eb1eff194ae343ea9a0d78c10df051dc',
-      // 'https://newsapi.org/v2/everything?q=bitcoin&apiKey=eb1eff194ae343ea9a0d78c10df051dc',
-      // 'https://newsapi.org/v2/everything?q=apple&from=2020-11-26&to=2020-11-26&sortBy=popularity&apiKey=eb1eff194ae343ea9a0d78c10df051dc',
-      // 'https://newsapi.org/v2/everything?domains=techcrunch.com,thenextweb.com&apiKey=eb1eff194ae343ea9a0d78c10df051dc'
-      ]
+        pageSize: 10,
+        page: 0,
+        total_result: 1,
+        total_count: 0
+      }
     };
   },
   created: function created() {},
@@ -2329,25 +2314,31 @@ __webpack_require__.r(__webpack_exports__);
     getNews: function getNews() {
       var _this = this;
 
-      if (this.url[this.news.url_index] != undefined) {
-        var params = {};
+      if (this.news.total_count < this.news.total_result) {
+        var params = {
+          country: 'us',
+          apiKey: '346bfbf84b504d14a0e3dff507aed1e4',
+          pageSize: this.news.pageSize,
+          page: this.news.page
+        };
+        var qs = new URLSearchParams(params);
         Object(_utils_api__WEBPACK_IMPORTED_MODULE_0__["default"])({
-          url: this.url[this.news.url_index],
-          data: params,
+          url: "http://newsapi.org/v2/top-headlines?".concat(qs),
+          data: {},
           method: "GET"
         }).then(function (response) {
           if (response.data.status == "ok") {
             var vm = _this;
+            _this.news.total_count += response.data.articles.length;
 
             if (response.data.articles.length > 0) {
               response.data.articles.forEach(function (article) {
                 vm.news.news_list.push(article);
               });
-            } // this.$store.commit('SET_NEWS_DETAILS', vm.news)
-
+            }
 
             _this.news.busy = false;
-            _this.news.url_index++;
+            _this.news.total_result = response.data.totalResults;
           }
         })["catch"](function (error) {
           console.log(error);
