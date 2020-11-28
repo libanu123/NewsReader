@@ -25,7 +25,7 @@
         },
         watch: { 
             $route() {
-                this.news.url_index = 0;
+                this.news.busy = true;
                 this.news.news_list = [];
                 this.getNews()
             }
@@ -36,14 +36,8 @@
                 image_src: '../image/loader.gif',
                 news : {
                     news_list : [],
-                    busy: false,
-                    url_index : 0,                    
+                    busy: false,                 
                 },
-                url  : [
-                    'https://newsapi.org/v2/sources?apiKey=346bfbf84b504d14a0e3dff507aed1e4',
-                    // 'https://newsapi.org/v2/sources?language=en&apiKey=346bfbf84b504d14a0e3dff507aed1e4',
-                    // 'https://newsapi.org/v2/sources?language=en&country=us&apiKey=346bfbf84b504d14a0e3dff507aed1e4'
-                ]
             }
         },
         created() {
@@ -51,40 +45,35 @@
         },
         methods: {
             getNews() {                
-                if(this.url[this.news.url_index] != undefined)
+                var params = {
+                    country : 'us',
+                    apiKey  : '346bfbf84b504d14a0e3dff507aed1e4',
+                }  
+                if(this.$route.params.cat != undefined)
                 {
-                    this.category_url = this.url[this.news.url_index];
-                    if(this.$route.params.cat != undefined)
-                    {
-                        this.category_url += '&category='+this.$route.params.cat+''
-                    }                    
-                    const params = {
-                    }         
-                    apiCall({
-                        url     : this.category_url,
-                        data    : params,
-                        method  : "GET"
-                    })
-                    .then(response => {
-                        if(response.data.status == "ok"){
-                            var vm = this;
-                            if( response.data.sources.length > 0 )
-                            {
-                                response.data.sources.forEach(function(source){
-                                    vm.news.news_list.push(source);
-                                });
-                            }
-                            this.news.busy = false;                            
-                            this.news.url_index ++;
-                        }       
-                    })
-                    .catch(error => {
-                        console.log(error);
-                    });                    
-                }
-                else{
-                   this.news.busy = false; 
-                }
+                    params.category = this.$route.params.cat;
+                }   
+                const qs = new URLSearchParams(params); 
+                apiCall({
+                    url     : `https://newsapi.org/v2/sources?${qs}`,
+                    data    : {},
+                    method  : "GET"
+                })
+                .then(response => {
+                    if(response.data.status == "ok"){
+                        var vm = this;
+                        if( response.data.sources.length > 0 )
+                        {
+                            response.data.sources.forEach(function(source){
+                                vm.news.news_list.push(source);
+                            });
+                        }
+                        this.news.busy = false;  
+                    }       
+                })
+                .catch(error => {
+                    console.log(error);
+                });                    
             },
         },
         mounted () {

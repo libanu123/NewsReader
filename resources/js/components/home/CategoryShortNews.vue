@@ -34,16 +34,18 @@
     export default {
         props: {
             news: {
-                news_list : [],
-                busy: false,
-                url_index : 0
             }
         },
         methods:{
-            /** pagination functions*/
             loadMore: function () {
-                this.news.busy = true;                                 
-                this.$emit('update-news', this.news);
+                this.news.busy = true; 
+                if( this.news.news_list.length > 0 )
+                {
+                    this.news.busy = false; 
+                }      
+                else{
+                    this.$emit('update-news', this.news);
+                }                          
             },
         },
     }

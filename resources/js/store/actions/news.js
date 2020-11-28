@@ -1,0 +1,1 @@
+export const SET_NEWS_DETAILS = "SET_NEWS_DETAILS";

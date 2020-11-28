@@ -31,17 +31,11 @@
                 news : {
                     news_list : [],
                     busy: false,
-                    url_index : 0,                    
+                    pageSize : 10,
+                    page : 0,   
+                    total_result    : 1,                  
+                    total_count     : 0                  
                 },
-                url  : [
-                    'http://newsapi.org/v2/top-headlines?country=us&apiKey=346bfbf84b504d14a0e3dff507aed1e4',
-                    // 'https://newsapi.org/v2/top-headlines?sources=bbc-news&apiKey=eb1eff194ae343ea9a0d78c10df051dc',
-                    // 'https://newsapi.org/v2/top-headlines?country=de&category=business&apiKey=eb1eff194ae343ea9a0d78c10df051dc',
-                    // 'https://newsapi.org/v2/top-headlines?q=trump&apiKey=eb1eff194ae343ea9a0d78c10df051dc',
-                    // 'https://newsapi.org/v2/everything?q=bitcoin&apiKey=eb1eff194ae343ea9a0d78c10df051dc',
-                    // 'https://newsapi.org/v2/everything?q=apple&from=2020-11-26&to=2020-11-26&sortBy=popularity&apiKey=eb1eff194ae343ea9a0d78c10df051dc',
-                    // 'https://newsapi.org/v2/everything?domains=techcrunch.com,thenextweb.com&apiKey=eb1eff194ae343ea9a0d78c10df051dc'
-                ]
             }
         },
         created() {
@@ -49,18 +43,25 @@
         },
         methods: {
             getNews() {
-                if(this.url[this.news.url_index] != undefined)
+                if(this.news.total_count < this.news.total_result)
                 {
                     const params = {
-                    }         
+                        country : 'us',
+                        apiKey  : '346bfbf84b504d14a0e3dff507aed1e4',
+                        pageSize: this.news.pageSize,
+                        page    : this.news.page,
+                    }  
+                    const qs = new URLSearchParams(params);   
+
                     apiCall({
-                        url     : this.url[this.news.url_index],
-                        data    : params,
+                        url     : `http://newsapi.org/v2/top-headlines?${qs}`,
+                        data    : {},
                         method  : "GET"
                     })
                     .then(response => {
                         if(response.data.status == "ok"){
                             var vm = this;
+                            this.news.total_count += response.data.articles.length
                             if( response.data.articles.length > 0 )
                             {
                                 response.data.articles.forEach(function(article){
@@ -68,7 +69,7 @@
                                 });
                             }
                             this.news.busy = false;                            
-                            this.news.url_index ++;
+                            this.news.total_result = response.data.totalResults;
                         }       
                     })
                     .catch(error => {

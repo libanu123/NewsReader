@@ -12,6 +12,7 @@ import VueMoment from 'vue-moment'
 
 Vue.use(VueRouter)
 Vue.use(VueMoment);
+import store from './store'
 
 import infiniteScroll from 'vue-infinite-scroll'
 Vue.use(infiniteScroll)
@@ -40,19 +41,14 @@ const router = new VueRouter({
             component: NewsHome,
         },
         {
-            path: '/news-details/:new_details',
+            path: '/news-details',
             name: 'new-details',
             component: NewDetails,
-            props: true,
-            // props(route) {
-            //     return {  new_details: route.query.new_details }
-            // }
         },
         {
             path: '/category/:cat',
             name: 'category',
             component: CategoryNews,
-            // props: true,
         },
     ],
 });
@@ -61,4 +57,5 @@ const app = new Vue({
     el: '#app',
     components: { App },
     router,
+    store
 });

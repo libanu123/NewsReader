@@ -21,8 +21,7 @@
                             <p class="card-text mb-auto pl-1">{{ columns['description'] | truncate(120) }}</p>
                         </div>
                         <div class="col-md-12 ">
-                            <router-link :to="{ name: 'new-details', params: { 'new_details': columns } }">Continue reading</router-link>
-                            <!-- <a href="#" class="stretched-link pl-1">Continue reading</a> -->
+                            <a @click="goToNewsDetails(columns)" class="stretched-link pl-1">Continue reading</a>
                         </div>
                     </div>
                 </div>
@@ -35,17 +34,18 @@
     export default {
         props: {
             news: {
-                news_list : [],
-                busy: false,
-                url_index : 0
             }
         },
         methods:{
-            /** pagination functions*/
             loadMore: function () {
                 this.news.busy = true;                                 
+                this.news.page ++;                                 
                 this.$emit('update-news', this.news);
             },
+            goToNewsDetails(news){
+                this.$store.commit('SET_NEWS_DETAILS', news)
+                this.$router.push({ name : 'new-details' })
+            }
         },
     }
 </script>
